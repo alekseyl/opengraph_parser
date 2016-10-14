@@ -52,6 +52,7 @@ class RedirectFollower
     end
 
     unless meta_redirect_url.empty?
+      raise meta_redirect_url
       self.url = meta_redirect_url
       self.redirect_limit -= 1
       resolve
