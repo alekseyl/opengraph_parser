@@ -38,9 +38,7 @@ class RedirectFollower
     # Check for <meta http-equiv="refresh">
     meta_redirect_url = ''
     doc = Nokogiri.parse(response.body)
-    doc.css('meta').each do |meta|
-      next unless meta.attribute('http-equiv') && meta.attribute('http-equiv').to_s.downcase == 'refresh'
-
+    doc.css('meta[http-equiv="refresh"]').each do |meta|
       meta_content = meta.attribute('content').to_s.strip
       meta_url = meta_content.match(/url=['"](.+)['"]/i).captures.first
 
