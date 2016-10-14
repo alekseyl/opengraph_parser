@@ -46,13 +46,13 @@ class RedirectFollower
 
       next unless meta_url.present?
 
+      raise meta_url
       meta_url_host = URI.parse(URI.escape(meta_url)).host
       meta_redirect_url += "#{uri.host}:#{uri.port}" unless meta_url_host
       meta_redirect_url += meta_url
     end
 
     unless meta_redirect_url.empty?
-      raise meta_redirect_url
       self.url = meta_redirect_url
       self.redirect_limit -= 1
       resolve
