@@ -1,3 +1,4 @@
+require 'nokogiri'
 require 'net/https'
 
 class RedirectFollower
@@ -30,6 +31,28 @@ class RedirectFollower
 
     if response.kind_of?(Net::HTTPRedirection)
       self.url = redirect_url
+      self.redirect_limit -= 1
+      resolve
+    end
+
+    # Check for <meta http-equiv="refresh">
+    meta_redirect_url = ''
+    doc = Nokogiri.parse(response.body)
+    doc.css('meta').each do |meta|
+      next unless meta.attribute('http-equiv') && meta.attribute('http-equiv').to_s.downcase == 'refresh'
+
+      meta_content = meta.attribute('content').to_s.strip
+      meta_url = meta_content.match(/url=['"](.+)['"]/i).captures
+
+      next unless meta_url.present?
+
+      meta_url_host = URI.parse(URI.escape(meta_url)).host
+      meta_redirect_url += "#{uri.host}:#{uri.port}" unless meta_url_host
+      meta_redirect_url += meta_url
+    end
+
+    unless meta_redirect_url.empty?
+      self.url = meta_redirect_url
       self.redirect_limit -= 1
       resolve
     end
