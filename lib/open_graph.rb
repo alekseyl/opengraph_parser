@@ -28,6 +28,9 @@ class OpenGraph
       else
         @body = RedirectFollower.new(@src, options).resolve.body
       end
+    rescue
+      @title = @url = @src
+      return
     end
 
     if @body
