@@ -5,7 +5,7 @@ require 'uri'
 
 class OpenGraph
   attr_accessor :src, :url, :type, :title, :description, :images, :metadata, :response, :original_images
-
+  
   def initialize(src, fallback = true, options = {})
     if fallback.is_a? Hash
       options = fallback
@@ -19,6 +19,12 @@ class OpenGraph
     load_fallback if fallback
     check_images_path
   end
+  
+  
+  def to_json(options = {})
+    %i(src url type title description images metadata response original_images)
+      .map{|attr| [attr, send(attr)]}.to_h.to_json(options)
+  end
 
   private
   def parse_opengraph(options = {})
@@ -26,6 +32,7 @@ class OpenGraph
       if @src.include? '</html>'
         @body = @src
       else
+        @src = "http://#{@src}" if @src[0,4] != 'http'
         @body = RedirectFollower.new(@src, options).resolve.body
       end
     rescue
